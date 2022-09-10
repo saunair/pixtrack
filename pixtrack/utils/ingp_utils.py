@@ -41,13 +41,9 @@ def initialize_ingp(snapshot_path,
     return testbed
 
 def sfm_to_nerf_pose(nerf2sfm, sfm_pose):
-    rotate_over_x = np.array([
-            [1.,  0.,  0., 0.],
-            [0., -1.,  0., 0.],
-            [0.,  0., -1., 0.],
-            [0.,  0.,  0., 1.],
-        ])
-    p1 = sfm_pose @ rotate_over_x
+    p1 = sfm_pose.copy()
+    p1[:3, 2] *= -1
+    p1[:3, 1] *= -1
     p1 = p1[[1,0,2,3],:]
     p1[2, :] *= -1
     p1[0:3, 3] -= nerf2sfm['centroid']
@@ -57,12 +53,6 @@ def sfm_to_nerf_pose(nerf2sfm, sfm_pose):
     return p1
 
 def nerf_to_sfm_pose(nerf2sfm, nerf_pose):
-    rotate_over_x = np.array([
-            [1.,  0.,  0., 0.],
-            [0., -1.,  0., 0.],
-            [0.,  0., -1., 0.],
-            [0.,  0.,  0., 1.],
-        ])
     p2 = nerf_pose.copy()
     p2[0:3, 3] += nerf2sfm['totp']
     p2 = np.linalg.inv(nerf2sfm['R']) @ p2
@@ -70,7 +60,6 @@ def nerf_to_sfm_pose(nerf2sfm, nerf_pose):
     p2[0:3, 3] += nerf2sfm['centroid']
     p2[2, :] *= -1
     p2 = p2[[1,0,2,3],:]
-    p2 = p2 @ rotate_over_x
+    p2[:3, 2] *= -1
+    p2[:3, 1] *= -1
     return p2
-
-

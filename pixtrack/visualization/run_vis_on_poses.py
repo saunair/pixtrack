@@ -12,7 +12,7 @@ import math
 from pathlib import Path
 
 
-def get_nerf_image(testbed, nerf_pose, camera):
+def get_nerf_rgb_image(testbed, nerf_pose, camera):
     spp = 8
     width, height = camera.size
     width = int(width)
@@ -29,10 +29,30 @@ def get_nerf_image(testbed, nerf_pose, camera):
     return nerf_img
 
 
+def get_nerf_depth_image(testbed, nerf_pose, camera):
+    spp = 8
+    width, height = camera.size
+    width = int(width)
+    height = int(height)
+    fl_x = float(camera.f[0])
+    angle_x = math.atan(width / (fl_x * 2)) * 2
+
+    testbed.fov = angle_x * 180 / np.pi
+    testbed.set_nerf_camera_matrix(nerf_pose[:3, :])
+    testbed.render_mode = testbed.render_mode.Depth
+
+    nerf_img = testbed.render(width, height, spp, True)
+    #nerf_img = nerf_img[:, :, :3] * 255.
+    #nerf_img = nerf_img.astype(np.uint8)
+    testbed.render_mode = testbed.render_mode.Shade
+    return nerf_img
+
+
 def get_query_image(path):
     assert os.path.isfile(path)
     img = cv2.imread(path, -1)
     return img
+
 
 def project_3d_to_2d(pts_3d, K=np.eye(3)):
     pts_2d = K @ pts_3d.T
@@ -258,7 +278,7 @@ if __name__ == '__main__':
             wIc_pix = pose_stream[name_q]['T_refined']
             cIw_sfm = get_camera_in_world_from_pixpose(wIc_pix)
             nerf_pose = sfm_to_nerf_pose(nerf2sfm, cIw_sfm)
-            nerf_img = get_nerf_image(testbed, nerf_pose, camera)
+            nerf_img = get_nerf_rgb_image(testbed, nerf_pose, camera)
         else:
             nerf_img = (np.ones(query_img.shape) * 255).astype(np.uint8)
         p = cIw_sfm.copy()

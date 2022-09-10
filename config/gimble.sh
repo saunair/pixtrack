@@ -1,4 +1,4 @@
-OBJECT="gimble_04MAR2022"
+OBJECT="gimble_04MAR2022_test"
 SNAPSHOTS_ROOT="/data/pixtrack/instant-ngp/snapshots"
 PIXSFM_DATASETS="/data/pixtrack/pixel-perfect-sfm/datasets"
 PIXSFM_OUTPUTS="/data/pixtrack/pixel-perfect-sfm/outputs"

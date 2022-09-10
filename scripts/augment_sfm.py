@@ -45,6 +45,8 @@ def main(output):
     import_features(original_ids, database, features)
     import_matches(original_ids, database, sfm_pairs, matches,
                    min_match_score=None, skip_geometric_verification=False)
+    
+    os.system(f"touch {sfm_dir}/*_with_intrinsics.txt")
     print('Done!')
 
 if __name__ == '__main__':

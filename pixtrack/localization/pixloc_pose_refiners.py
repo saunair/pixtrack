@@ -85,6 +85,7 @@ class PoseTrackerLocalizer(Localizer):
         ret = self.refiner.refine(name, camera, pose_init, reference_images, loc=loc, image_query=image_query, pose=pose, reference_images=reference_images_raw, dynamic_id=dynamic_id)
         return ret
 
+
 class PoseTrackerRefiner(BaseRefiner):
     default_config = dict(
         multiscale=None,
@@ -168,31 +169,10 @@ class PoseTrackerRefiner(BaseRefiner):
         for image_scale in multiscales:
             # Compute the reference observations
             # TODO: can we compute this offline before hand?
-            if images_ref is not None:
-                dbid_p3did_to_feats = dict()
-                for idx, dbid in enumerate(dbid_to_p3dids):
-                    p3dids = dbid_to_p3dids[dbid]
+            features_dict = self.features_dicts[dynamic_id]['features']
 
-                    features_ref_dense, scales_ref = self.dense_feature_extraction(
-                            images_ref[idx], rnames[idx], image_scale)
-                    dbid_p3did_to_feats[dbid] = self.interp_sparse_observations(
-                            features_ref_dense, scales_ref, dbid, p3dids, pose)
-                    del features_ref_dense
-
-                p3dids = list(dbid_p3did_to_feats[ref_id].keys())
-                p3did_to_feat = [tuple(dbid_p3did_to_feats[ref_id][p3did]) for p3did in p3dids]
-            else:
-                if dynamic_id is None:
-                    if ref_id in self.features_dicts:
-                        features_dict = self.features_dicts[ref_id]
-                    else:
-                        features_dict = self.read_features(ref_id)
-                    self.features_dicts[ref_id] = features_dict
-                else:
-                    features_dict = self.features_dicts[dynamic_id]['features']
-
-                p3dids = features_dict[str(image_scale)]['p3dids']
-                p3did_to_feat = features_dict[str(image_scale)]['p3did_to_feat']
+            p3dids = features_dict[str(image_scale)]['p3dids']
+            p3did_to_feat = features_dict[str(image_scale)]['p3did_to_feat']
 
             features_query, scales_query = self.dense_feature_extraction(
                         image_query, qname, image_scale)
